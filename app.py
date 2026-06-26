@@ -68,8 +68,46 @@ def api_key_required(f):
         return f(*args, **kwargs)
     return decorated
 
-CAMRAPIDPAY_CREATE = "https://camrapidpay.com/api/v1/khqr/create-payments"
-CAMRAPIDPAY_CHECK  = "https://camrapidpay.com/api/v1/khqr/check-transaction-api"
+# ─── NBC Bakong SDK Config ────────────────────────────────────────────────────
+BAKONG_JWT     = os.environ.get("BAKONG_JWT", "")
+BAKONG_API     = "https://api-bakong.nbc.gov.kh"
+BAKONG_CREATE  = f"{BAKONG_API}/v1/generate_qr"
+BAKONG_CHECK   = f"{BAKONG_API}/v1/check_transaction_by_md5"
+
+def bakong_headers():
+    return {
+        "Authorization": f"Bearer {BAKONG_JWT}",
+        "Content-Type":  "application/json",
+    }
+
+def generate_bakong_qr(bakong_id: str, merchant_name: str,
+                       amount: float, currency: str, note: str) -> dict:
+    """Call NBC Bakong API to generate KHQR."""
+    # NBC Bakong uses amount in cents for KHR (integer), USD as float
+    if currency.upper() == "KHR":
+        amt = int(amount)
+    else:
+        amt = round(amount, 2)
+
+    payload = {
+        "bakongAccountId": bakong_id,
+        "merchantName":    merchant_name,
+        "currency":        currency.upper(),
+        "amount":          amt,
+        "memo":            note or "",
+    }
+    r = requests.post(BAKONG_CREATE, json=payload,
+                      headers=bakong_headers(), timeout=15)
+    r.raise_for_status()
+    return r.json()
+
+def check_bakong_md5(md5: str) -> dict:
+    """Poll NBC Bakong API for transaction status by MD5."""
+    r = requests.post(BAKONG_CHECK,
+                      json={"md5": md5},
+                      headers=bakong_headers(), timeout=10)
+    r.raise_for_status()
+    return r.json()
 
 # ─── Auto-Polling Engine ──────────────────────────────────────────────────────
 
@@ -77,7 +115,7 @@ _poll_lock    = threading.Lock()
 _active_polls = {}   # pay_id -> threading.Event (set = stop)
 
 def _do_poll(pay_id, interval=5):
-    """Background thread: poll CamRapidPay every `interval` seconds until paid/expired."""
+    """Background thread: poll NBC Bakong every `interval` seconds until paid/expired."""
     stop_event = _active_polls.get(pay_id)
     while stop_event and not stop_event.is_set():
         try:
@@ -102,12 +140,11 @@ def _do_poll(pay_id, interval=5):
                 else:
                     break
 
-                r = requests.get(CAMRAPIDPAY_CHECK, params=params, timeout=10)
-                result = r.json()
+                result = check_bakong_md5(pmt.md5)
 
-                paid = (result.get("status") == "SUCCESS" or
-                        result.get("isPaid") is True or
-                        result.get("data", {}).get("status") == "SUCCESS")
+                # NBC Bakong: responseCode 0 = found/paid
+                rc   = result.get("responseCode", -1)
+                paid = (rc == 0)
 
                 if paid:
                     pmt.status  = "PAID"
@@ -285,29 +322,31 @@ def create_qr():
     except:
         return jsonify({"success": False, "error": "amount មិនត្រឹមត្រូវ"}), 400
 
-    payload = {
-        "bakongId":     user.bakong_id,
-        "merchantName": user.shop_name,
-        "amount":       amount,
-        "currency":     currency,
-        "note":         note,
-    }
-
     try:
-        r = requests.post(CAMRAPIDPAY_CREATE, json=payload, timeout=15)
-        result = r.json()
+        result = generate_bakong_qr(
+            bakong_id     = user.bakong_id,
+            merchant_name = user.shop_name,
+            amount        = amount,
+            currency      = currency,
+            note          = note,
+        )
     except Exception as e:
-        return jsonify({"success": False, "error": f"CamRapidPay error: {str(e)}"}), 502
+        return jsonify({"success": False, "error": f"Bakong error: {str(e)}"}), 502
+
+    # NBC Bakong response: result.data.qrString, result.data.md5
+    data_block = result.get("data") or {}
+    qr_string  = data_block.get("qrString") or data_block.get("qr") or ""
+    md5_hash   = data_block.get("md5") or ""
 
     # Save payment record
     pmt = Payment(
         user_id        = user.id,
-        md5            = result.get("md5") or result.get("data", {}).get("md5"),
-        transaction_id = result.get("transactionId") or result.get("data", {}).get("transactionId"),
+        md5            = md5_hash,
+        transaction_id = data_block.get("transactionId", ""),
         amount         = amount,
         currency       = currency,
         note           = note,
-        qr_string      = result.get("qrString") or result.get("data", {}).get("qrString"),
+        qr_string      = qr_string,
         expire_minutes = expire,
         webhook_url    = webhook,
         status         = "PENDING",
@@ -360,22 +399,15 @@ def check_payment():
     user = request.api_user
     data = request.get_json() or {} if request.method == "POST" else request.args
 
-    transaction_id = data.get("transaction_id") or data.get("transactionId")
-    md5            = data.get("md5")
-    if not transaction_id and not md5:
-        return jsonify({"success": False, "error": "transaction_id ឬ md5 ត្រូវការ"}), 400
-
-    params = {}
-    if transaction_id: params["transactionId"] = transaction_id
-    if md5:            params["md5"] = md5
+    md5 = data.get("md5")
+    if not md5:
+        return jsonify({"success": False, "error": "md5 ត្រូវការ"}), 400
 
     try:
-        r      = requests.get(CAMRAPIDPAY_CHECK, params=params, timeout=15)
-        result = r.json()
+        result = check_bakong_md5(md5)
+        paid   = (result.get("responseCode", -1) == 0)
     except Exception as e:
-        return jsonify({"success": False, "error": f"CamRapidPay error: {str(e)}"}), 502
-
-    paid = (result.get("status") == "SUCCESS" or result.get("isPaid") is True)
+        return jsonify({"success": False, "error": f"Bakong error: {str(e)}"}), 502
     return jsonify({"success": True, "paid": paid, "data": result})
 
 @app.route("/api/v1/info", methods=["GET"])
