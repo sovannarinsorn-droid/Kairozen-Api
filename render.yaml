@@ -3,9 +3,11 @@ services:
     name: kairozen-khqr-api
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app
+    startCommand: gunicorn kairozen_khqr_api:app
     envVars:
       - key: SECRET_KEY
         generateValue: true
       - key: DATABASE_URL
         value: sqlite:///kairozen.db
+      - key: BAKONG_JWT
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoiOWM4MjIwZTEwMDY4NGRlMyJ9.cabM_mcD68L8i7syjbPYi_YeCK0Cl0b0oY9I6iWSAQI
