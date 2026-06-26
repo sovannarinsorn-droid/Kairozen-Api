@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Dashboard · Kairozen KHQR</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--bg:#0a0d14;--surface:#111520;--border:#1e2535;--accent:#4f9eff;--accent2:#7c5cfc;--text:#e8eaf0;--muted:#6b7280;--red:#ef4444;--green:#22c55e;--yellow:#fbbf24}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh}
+  nav{display:flex;justify-content:space-between;align-items:center;padding:16px 40px;border-bottom:1px solid var(--border)}
+  .logo{font-size:1.1rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .nav-right{display:flex;align-items:center;gap:16px}
+  .nav-email{color:var(--muted);font-size:.85rem}
+  .btn-sm{padding:6px 16px;border-radius:7px;font-size:.82rem;font-weight:500;cursor:pointer;border:none;font-family:'Inter',sans-serif;text-decoration:none;transition:.2s}
+  .btn-danger{background:#1a0a0a;color:#fca5a5;border:1px solid #7f1d1d}
+  .btn-danger:hover{background:#7f1d1d;color:#fff}
+  .container{max-width:960px;margin:0 auto;padding:36px 24px}
+
+  /* Stats */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:24px}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px}
+  .stat-label{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+  .stat-val{font-size:1.5rem;font-weight:700}
+  .stat-val.green{color:var(--green)} .stat-val.blue{color:var(--accent)} .stat-val.yellow{color:var(--yellow)}
+
+  .section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:18px}
+  .section-title{font-size:.95rem;font-weight:600;margin-bottom:18px}
+
+  label{display:block;font-size:.78rem;color:var(--muted);margin-bottom:5px;font-weight:500}
+  input{width:100%;background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:9px 13px;color:var(--text);font-size:.88rem;font-family:'Inter',sans-serif;outline:none;transition:.2s;margin-bottom:12px}
+  input:focus{border-color:var(--accent)}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .btn{padding:9px 20px;border-radius:8px;border:none;font-size:.86rem;font-weight:600;cursor:pointer;transition:.2s;font-family:'Inter',sans-serif}
+  .btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:#3b8ae0}
+  .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted)}.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+  .btn-primary:disabled{opacity:.5;cursor:not-allowed}
+
+  .api-key-box{background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:11px 15px;display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .api-key-val{font-family:monospace;font-size:.82rem;color:var(--accent);flex:1;word-break:break-all}
+  .copy-btn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:4px 12px;border-radius:6px;font-size:.75rem;cursor:pointer;transition:.2s;white-space:nowrap;font-family:'Inter',sans-serif}
+  .copy-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+  /* Tabs */
+  .tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+  .tab{padding:5px 13px;border-radius:6px;font-size:.78rem;cursor:pointer;border:1px solid var(--border);color:var(--muted);transition:.2s}
+  .tab.active{border-color:var(--accent);color:var(--accent);background:#0d1a2e}
+  pre{background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:16px;font-size:.76rem;line-height:1.7;overflow-x:auto;white-space:pre-wrap;color:#cdd5e0}
+  .hl-kw{color:var(--accent2)}.hl-st{color:#86efac}.hl-fn{color:var(--accent)}.hl-nb{color:var(--yellow)}.hl-cm{color:#4b5563}
+
+  /* Payment table */
+  .pmt-table{width:100%;border-collapse:collapse;font-size:.82rem}
+  .pmt-table th{text-align:left;padding:8px 10px;color:var(--muted);font-weight:500;border-bottom:1px solid var(--border);font-size:.75rem;text-transform:uppercase;letter-spacing:.04em}
+  .pmt-table td{padding:9px 10px;border-bottom:1px solid #0d1117;vertical-align:middle}
+  .pmt-table tr:last-child td{border-bottom:none}
+  .badge{display:inline-block;padding:2px 9px;border-radius:4px;font-size:.7rem;font-weight:600}
+  .badge-pending{background:#1a1200;color:var(--yellow);border:1px solid #92400e}
+  .badge-paid{background:#0a1a0f;color:var(--green);border:1px solid #14532d}
+  .badge-expired{background:#1a0a0a;color:#9ca3af;border:1px solid #374151}
+  .poll-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--yellow);animation:pulse 1s ease-in-out infinite;margin-right:5px}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+  .alert{padding:8px 13px;border-radius:7px;font-size:.82rem;margin-top:8px;display:none}
+  .alert.error{background:#1a0a0a;border:1px solid #7f1d1d;color:#fca5a5}
+  .alert.success{background:#0a1a0f;border:1px solid #14532d;color:#86efac}
+  .loader{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .empty{text-align:center;padding:28px;color:var(--muted);font-size:.85rem}
+
+  @media(max-width:600px){nav{padding:14px 16px}.container{padding:20px 14px}.row2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">⚡ Kairozen KHQR</div>
+  <div class="nav-right">
+    <span class="nav-email">{{ user.email }}</span>
+    <a href="/logout" class="btn-sm btn-danger">Logout</a>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-label">Total Received</div>
+      <div class="stat-val green" id="statTotal">{{ "%.0f"|format(user.total_paid) }} ៛</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Pending Payments</div>
+      <div class="stat-val yellow" id="statPending">{{ payments|selectattr("status","eq","PENDING")|list|length }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Bakong ID</div>
+      <div class="stat-val blue" style="font-size:.95rem;margin-top:4px" id="statBakong">{{ user.bakong_id or "—" }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Shop Name</div>
+      <div class="stat-val" style="font-size:.95rem;margin-top:4px" id="statShop">{{ user.shop_name or "—" }}</div>
+    </div>
+  </div>
+
+  <!-- Setup -->
+  <div class="section">
+    <div class="section-title">🏪 Shop Setup</div>
+    <div class="row2">
+      <div><label>Bakong ID</label><input type="text" id="bakongId" placeholder="yourname@bank" value="{{ user.bakong_id or '' }}"/></div>
+      <div><label>Shop Name</label><input type="text" id="shopName" placeholder="Kairozen Store" value="{{ user.shop_name or '' }}"/></div>
+    </div>
+    <button class="btn btn-primary" id="saveBtn" onclick="saveSetup()">💾 Save</button>
+    <div class="alert" id="setupAlert"></div>
+  </div>
+
+  <!-- API Key -->
+  <div class="section" id="apiSection" style="{{ 'display:none' if not user.api_key else '' }}">
+    <div class="section-title">🔑 API Key</div>
+    <div class="api-key-box">
+      <span class="api-key-val" id="apiKeyVal">{{ user.api_key or '' }}</span>
+      <button class="copy-btn" onclick="copyKey()">📋 Copy</button>
+    </div>
+    <button class="btn btn-ghost" style="font-size:.78rem" onclick="regenKey()">🔄 Regenerate</button>
+    <div class="alert" id="keyAlert"></div>
+
+    <!-- Code examples -->
+    <div style="margin-top:24px">
+      <div class="section-title" style="margin-bottom:14px">📖 Auto-Poll Code</div>
+      <div class="tabs">
+        <div class="tab active" onclick="showTab('python')">Python Bot</div>
+        <div class="tab" onclick="showTab('webhook')">Webhook Mode</div>
+        <div class="tab" onclick="showTab('status')">Check Status</div>
+      </div>
+
+      <pre id="code-python"><span class="hl-kw">import</span> telebot, requests, time
+
+bot     = telebot.TeleBot(<span class="hl-st">"BOT_TOKEN"</span>)
+API_KEY = <span class="hl-st">"<span id="py-key">{{ user.api_key or 'kz_your_key' }}</span>"</span>
+BASE    = <span class="hl-st">"https://kairozen-khqr.onrender.com"</span>
+HDR     = {<span class="hl-st">"x-api-key"</span>: API_KEY}
+
+<span class="hl-fn">@bot.message_handler</span>(commands=[<span class="hl-st">"pay"</span>])
+<span class="hl-kw">def</span> <span class="hl-fn">pay</span>(msg):
+    <span class="hl-cm"># 1. Create QR — server auto-polls every 5s</span>
+    r = requests.<span class="hl-fn">post</span>(f<span class="hl-st">"{BASE}/api/v1/create-qr"</span>, headers=HDR, json={
+        <span class="hl-st">"amount"</span>: <span class="hl-nb">5000</span>, <span class="hl-st">"currency"</span>: <span class="hl-st">"KHR"</span>,
+        <span class="hl-st">"note"</span>: <span class="hl-st">"Order #1"</span>, <span class="hl-st">"expire_minutes"</span>: <span class="hl-nb">10</span>,
+        <span class="hl-st">"poll_interval"</span>: <span class="hl-nb">5</span>   <span class="hl-cm"># server checks every 5 seconds</span>
+    })
+    data   = r.json()
+    pay_id = data[<span class="hl-st">"pay_id"</span>]
+    qr     = data[<span class="hl-st">"data"</span>][<span class="hl-st">"qrString"</span>]
+    bot.<span class="hl-fn">send_message</span>(msg.chat.id, f<span class="hl-st">"📱 Scan QR:\n`{qr}`"</span>, parse_mode=<span class="hl-st">"Markdown"</span>)
+
+    <span class="hl-cm"># 2. Bot-side check loop (optional — server already polling)</span>
+    <span class="hl-kw">for</span> _ <span class="hl-kw">in</span> <span class="hl-fn">range</span>(<span class="hl-nb">120</span>):   <span class="hl-cm"># wait up to 10 min</span>
+        s = requests.<span class="hl-fn">get</span>(f<span class="hl-st">"{BASE}/api/v1/payment-status/{pay_id}"</span>, headers=HDR).json()
+        <span class="hl-kw">if</span> s[<span class="hl-st">"status"</span>] == <span class="hl-st">"PAID"</span>:
+            bot.<span class="hl-fn">send_message</span>(msg.chat.id, <span class="hl-st">"✅ បានបង់ប្រាក់ហើយ!"</span>)
+            <span class="hl-kw">break</span>
+        <span class="hl-kw">elif</span> s[<span class="hl-st">"status"</span>] == <span class="hl-st">"EXPIRED"</span>:
+            bot.<span class="hl-fn">send_message</span>(msg.chat.id, <span class="hl-st">"⏰ QR expired"</span>); <span class="hl-kw">break</span>
+        time.<span class="hl-fn">sleep</span>(<span class="hl-nb">5</span>)
+
+bot.<span class="hl-fn">polling</span>()</pre>
+
+      <pre id="code-webhook" style="display:none"><span class="hl-cm"># Use webhook_url to get notified automatically when paid</span>
+r = requests.<span class="hl-fn">post</span>(f<span class="hl-st">"{BASE}/api/v1/create-qr"</span>, headers=HDR, json={
+    <span class="hl-st">"amount"</span>:       <span class="hl-nb">5000</span>,
+    <span class="hl-st">"currency"</span>:     <span class="hl-st">"KHR"</span>,
+    <span class="hl-st">"note"</span>:         <span class="hl-st">"Order #42"</span>,
+    <span class="hl-st">"expire_minutes"</span>: <span class="hl-nb">10</span>,
+    <span class="hl-st">"poll_interval"</span>: <span class="hl-nb">5</span>,
+    <span class="hl-st">"webhook_url"</span>:  <span class="hl-st">"https://yoursite.com/payment-callback"</span>
+})
+
+<span class="hl-cm"># When paid, server POSTs to webhook_url:</span>
+<span class="hl-cm"># {</span>
+<span class="hl-cm">#   "pay_id":   "abc123",</span>
+<span class="hl-cm">#   "status":   "PAID",</span>
+<span class="hl-cm">#   "amount":   5000,</span>
+<span class="hl-cm">#   "currency": "KHR",</span>
+<span class="hl-cm">#   "note":     "Order #42",</span>
+<span class="hl-cm">#   "paid_at":  "2025-01-01T12:00:00"</span>
+<span class="hl-cm"># }</span>
+
+<span class="hl-cm"># Flask webhook receiver example:</span>
+<span class="hl-fn">@app.route</span>(<span class="hl-st">"/payment-callback"</span>, methods=[<span class="hl-st">"POST"</span>])
+<span class="hl-kw">def</span> <span class="hl-fn">on_paid</span>():
+    data = request.<span class="hl-fn">get_json</span>()
+    <span class="hl-kw">if</span> data[<span class="hl-st">"status"</span>] == <span class="hl-st">"PAID"</span>:
+        <span class="hl-fn">deliver_order</span>(data[<span class="hl-st">"note"</span>])  <span class="hl-cm"># your logic</span>
+    <span class="hl-kw">return</span> <span class="hl-st">"ok"</span></pre>
+
+      <pre id="code-status" style="display:none"><span class="hl-cm"># Check any payment status by pay_id</span>
+pay_id = <span class="hl-st">"abc123def456"</span>
+
+r = requests.<span class="hl-fn">get</span>(
+    f<span class="hl-st">"{BASE}/api/v1/payment-status/{pay_id}"</span>,
+    headers={<span class="hl-st">"x-api-key"</span>: API_KEY}
+)
+data = r.json()
+<span class="hl-cm"># data["status"]  →  "PENDING" / "PAID" / "EXPIRED"</span>
+<span class="hl-cm"># data["paid_at"] →  ISO timestamp or null</span>
+<span class="hl-cm"># data["amount"]  →  float</span>
+
+<span class="hl-cm"># Cancel / expire manually:</span>
+requests.<span class="hl-fn">post</span>(
+    f<span class="hl-st">"{BASE}/api/v1/cancel-payment/{pay_id}"</span>,
+    headers={<span class="hl-st">"x-api-key"</span>: API_KEY}
+)</pre>
+    </div>
+  </div>
+
+  <!-- Payment History -->
+  <div class="section">
+    <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
+      <span>📋 Payment History</span>
+      <button class="btn-sm btn-ghost" style="font-size:.75rem" onclick="refreshPayments()">↻ Refresh</button>
+    </div>
+    <div id="pmtTableWrap">
+      <table class="pmt-table">
+        <thead><tr>
+          <th>Pay ID</th><th>Amount</th><th>Note</th><th>Status</th><th>Time</th>
+        </tr></thead>
+        <tbody id="pmtBody">
+          {% for p in payments %}
+          <tr>
+            <td><code style="font-size:.75rem;color:var(--muted)">{{ p.pay_id }}</code></td>
+            <td style="color:var(--text)">{{ "%.0f"|format(p.amount) }} {{ p.currency }}</td>
+            <td style="color:var(--muted)">{{ p.note or "—" }}</td>
+            <td>
+              {% if p.status == "PAID" %}
+                <span class="badge badge-paid">✅ PAID</span>
+              {% elif p.status == "PENDING" %}
+                <span class="badge badge-pending"><span class="poll-dot"></span>POLLING</span>
+              {% else %}
+                <span class="badge badge-expired">EXPIRED</span>
+              {% endif %}
+            </td>
+            <td style="color:var(--muted);font-size:.75rem">{{ p.created_at.strftime('%d/%m %H:%M') }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="5"><div class="empty">មិនទាន់មី payment — បង្កើត QR ដំបូង</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+async function saveSetup() {
+  const bakong = document.getElementById("bakongId").value.trim();
+  const shop   = document.getElementById("shopName").value.trim();
+  const btn    = document.getElementById("saveBtn");
+  if (!bakong || !shop) { showAlert("setupAlert","សូមបំពេញ Bakong ID និង Shop Name","error"); return; }
+  btn.disabled = true; btn.innerHTML = '<span class="loader"></span>';
+  const res  = await fetch("/api/setup",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({bakong_id:bakong,shop_name:shop})});
+  const data = await res.json();
+  if (data.success) {
+    showAlert("setupAlert","✅ រក្សាទុករួច","success");
+    document.getElementById("apiKeyVal").textContent = data.api_key;
+    document.getElementById("py-key").textContent    = data.api_key;
+    document.getElementById("apiSection").style.display = "";
+    document.getElementById("statBakong").textContent = bakong;
+    document.getElementById("statShop").textContent   = shop;
+  } else showAlert("setupAlert", data.error, "error");
+  btn.disabled = false; btn.textContent = "💾 Save";
+}
+
+async function regenKey() {
+  if (!confirm("Regenerate? Key ចាស់នឹង expire ភ្លាម")) return;
+  const data = await fetch("/api/regenerate-key",{method:"POST"}).then(r=>r.json());
+  if (data.success) {
+    document.getElementById("apiKeyVal").textContent = data.api_key;
+    document.getElementById("py-key").textContent    = data.api_key;
+    showAlert("keyAlert","✅ Key ថ្មីបានបង្កើត","success");
+  }
+}
+
+function copyKey() {
+  navigator.clipboard.writeText(document.getElementById("apiKeyVal").textContent).then(()=>{
+    const b = document.querySelector(".copy-btn"); b.textContent="✅ Copied!";
+    setTimeout(()=>b.textContent="📋 Copy",2000);
+  });
+}
+
+function showTab(t) {
+  ["python","webhook","status"].forEach(id=>document.getElementById("code-"+id).style.display=id===t?"":"none");
+  document.querySelectorAll(".tab").forEach((el,i)=>el.classList.toggle("active",["python","webhook","status"][i]===t));
+}
+
+async function refreshPayments() {
+  const res  = await fetch("/api/payments");
+  const data = await res.json();
+  if (!data.success) return;
+  const body = document.getElementById("pmtBody");
+  if (!data.payments.length) { body.innerHTML='<tr><td colspan="5"><div class="empty">មិនទាន់មី payment</div></td></tr>'; return; }
+  const statusMap = {
+    PAID:    '<span class="badge badge-paid">✅ PAID</span>',
+    PENDING: '<span class="badge badge-pending"><span class="poll-dot"></span>POLLING</span>',
+    EXPIRED: '<span class="badge badge-expired">EXPIRED</span>',
+  };
+  body.innerHTML = data.payments.map(p=>{
+    const d = new Date(p.created_at); const ts = `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+    return `<tr>
+      <td><code style="font-size:.75rem;color:var(--muted)">${p.pay_id}</code></td>
+      <td>${Math.round(p.amount)} ${p.currency}</td>
+      <td style="color:var(--muted)">${p.note||"—"}</td>
+      <td>${statusMap[p.status]||p.status}</td>
+      <td style="color:var(--muted);font-size:.75rem">${ts}</td>
+    </tr>`;
+  }).join("");
+
+  // Update stats
+  const paid    = data.payments.filter(p=>p.status==="PAID").reduce((s,p)=>s+p.amount,0);
+  const pending = data.payments.filter(p=>p.status==="PENDING").length;
+  document.getElementById("statPending").textContent = pending;
+}
+
+function showAlert(id, msg, type) {
+  const el=document.getElementById(id); el.textContent=msg; el.className=`alert ${type}`; el.style.display="block";
+  setTimeout(()=>el.style.display="none",4000);
+}
+
+// Auto refresh every 6 seconds if there are pending payments
+setInterval(()=>{
+  if (document.querySelectorAll(".badge-pending").length) refreshPayments();
+}, 6000);
+</script>
+</body>
+</html>

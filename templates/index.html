@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Kairozen KHQR API</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --bg:#0a0d14;
+    --surface:#111520;
+    --border:#1e2535;
+    --accent:#4f9eff;
+    --accent2:#7c5cfc;
+    --text:#e8eaf0;
+    --muted:#6b7280;
+    --green:#22c55e;
+  }
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh}
+
+  /* NAV */
+  nav{display:flex;justify-content:space-between;align-items:center;padding:20px 48px;border-bottom:1px solid var(--border)}
+  .logo{font-size:1.2rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .nav-links a{color:var(--muted);text-decoration:none;margin-left:28px;font-size:.9rem;transition:.2s}
+  .nav-links a:hover{color:var(--text)}
+  .btn{display:inline-block;padding:8px 20px;border-radius:8px;text-decoration:none;font-size:.9rem;font-weight:500;cursor:pointer;transition:.2s}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-primary:hover{background:#3b8ae0}
+  .btn-outline{border:1px solid var(--border);color:var(--text);background:transparent}
+  .btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+
+  /* HERO */
+  .hero{text-align:center;padding:100px 24px 80px;max-width:800px;margin:0 auto}
+  .badge{display:inline-block;background:#1a1f2e;border:1px solid var(--border);color:var(--accent);font-size:.75rem;padding:4px 14px;border-radius:20px;margin-bottom:24px;letter-spacing:.05em}
+  h1{font-size:3rem;font-weight:700;line-height:1.2;margin-bottom:20px}
+  h1 span{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .hero-sub{color:var(--muted);font-size:1.1rem;line-height:1.7;margin-bottom:40px;max-width:560px;margin-left:auto;margin-right:auto}
+  .hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+  /* CODE PREVIEW */
+  .code-preview{background:#0d1117;border:1px solid var(--border);border-radius:12px;padding:24px;text-align:left;max-width:680px;margin:60px auto 0;font-family:monospace;font-size:.82rem;line-height:1.7;overflow-x:auto}
+  .code-preview .cm{color:#6b7280}.code-preview .kw{color:var(--accent2)}.code-preview .st{color:#86efac}.code-preview .fn{color:var(--accent)}.code-preview .nb{color:#fbbf24}
+
+  /* FEATURES */
+  .features{padding:80px 24px;max-width:1100px;margin:0 auto}
+  .section-label{text-align:center;color:var(--muted);font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px}
+  h2{text-align:center;font-size:2rem;font-weight:700;margin-bottom:60px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px}
+  .card-icon{font-size:1.6rem;margin-bottom:14px}
+  .card h3{font-size:1rem;font-weight:600;margin-bottom:8px}
+  .card p{color:var(--muted);font-size:.88rem;line-height:1.6}
+
+  /* ENDPOINTS */
+  .endpoints{padding:60px 24px;max-width:900px;margin:0 auto}
+  .endpoint{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden}
+  .endpoint-header{display:flex;align-items:center;gap:12px;padding:16px 20px}
+  .method{font-size:.75rem;font-weight:700;padding:3px 10px;border-radius:5px;font-family:monospace}
+  .method.post{background:#1a3a2a;color:var(--green)}
+  .method.get{background:#1a2a3a;color:var(--accent)}
+  .endpoint-path{font-family:monospace;font-size:.9rem;color:var(--text)}
+  .endpoint-desc{font-size:.82rem;color:var(--muted);margin-left:auto}
+
+  /* CTA */
+  .cta{text-align:center;padding:80px 24px;border-top:1px solid var(--border)}
+  .cta h2{font-size:2rem;margin-bottom:16px}
+  .cta p{color:var(--muted);margin-bottom:32px}
+
+  footer{text-align:center;padding:24px;border-top:1px solid var(--border);color:var(--muted);font-size:.8rem}
+
+  @media(max-width:600px){
+    nav{padding:16px 20px}
+    h1{font-size:2rem}
+    .hero{padding:60px 20px 40px}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">⚡ Kairozen KHQR</div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#endpoints">API</a>
+    <a href="/login" class="btn btn-outline" style="margin-left:20px">Login</a>
+    <a href="/register" class="btn btn-primary" style="margin-left:8px">Get API Key</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="badge">🇰🇭 Bakong KHQR API Platform</div>
+  <h1>បង្កើត <span>KHQR Payment</span><br/>ដោយស្រួល</h1>
+  <p class="hero-sub">Register ម្តង → បានAAPI Key → Generate QR + Check Payment ក្នុង bot ឬ website របស់អ្នក</p>
+  <div class="hero-btns">
+    <a href="/register" class="btn btn-primary">ចុះឈ្មោះឥឡូវ →</a>
+    <a href="#endpoints" class="btn btn-outline">មើល API Docs</a>
+  </div>
+
+  <div class="code-preview">
+    <span class="cm"># Generate KHQR in your bot</span><br/>
+    <span class="kw">import</span> requests<br/><br/>
+    r = requests.<span class="fn">post</span>(<span class="st">"https://kairozen-khqr.onrender.com/api/v1/create-qr"</span>,<br/>
+    &nbsp;&nbsp;headers={<span class="st">"x-api-key"</span>: <span class="st">"kz_your_api_key"</span>},<br/>
+    &nbsp;&nbsp;json={<span class="st">"amount"</span>: <span class="nb">5000</span>, <span class="st">"currency"</span>: <span class="st">"KHR"</span>}<br/>
+    )<br/>
+    qr_data = r.json()[<span class="st">"data"</span>]
+  </div>
+</section>
+
+<section class="features" id="features">
+  <p class="section-label">មុខងារ</p>
+  <h2>អ្វីដែលមាន</h2>
+  <div class="grid">
+    <div class="card">
+      <div class="card-icon">🔑</div>
+      <h3>API Key ផ្ទាល់ខ្លួន</h3>
+      <p>Register ហើយបាន API Key ភ្លាម — bind ជាមួយ Bakong ID និង Shop Name របស់អ្នក</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📱</div>
+      <h3>Generate KHQR</h3>
+      <p>POST ទៅ /api/v1/create-qr ជាមួយ amount → បាន QR data ពី CamRapidPay</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">✅</div>
+      <h3>Check Payment</h3>
+      <p>Polling transaction status ដោយ transaction_id ឬ md5 hash</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📊</div>
+      <h3>Dashboard</h3>
+      <p>មើល total payment ដែលបានទទួល, manage API key, update shop info</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🤖</div>
+      <h3>Bot Ready</h3>
+      <p>ប្រើបាន telebot, python-telegram-bot, aiogram — headers x-api-key ប៉ុណ្ណោះ</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔒</div>
+      <h3>Secure</h3>
+      <p>API Key protected, password hashed — data របស់អ្នករក្សាទុកដោយសុវត្ថិភាព</p>
+    </div>
+  </div>
+</section>
+
+<section class="endpoints" id="endpoints">
+  <p class="section-label">Endpoints</p>
+  <h2>API Reference</h2>
+
+  <div style="background:#111520;border:1px solid #1e2535;border-radius:10px;padding:16px 20px;margin-bottom:20px;font-size:.85rem;color:#6b7280">
+    🔑 Header: <code style="color:#4f9eff">x-api-key: kz_your_key</code> &nbsp;|&nbsp; Base URL: <code style="color:#86efac">https://kairozen-khqr.onrender.com</code>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method post">POST</span>
+      <span class="endpoint-path">/api/v1/create-qr</span>
+      <span class="endpoint-desc">បង្កើត KHQR</span>
+    </div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method get">GET</span>
+      <span class="endpoint-path">/api/v1/check-payment</span>
+      <span class="endpoint-desc">Check transaction status</span>
+    </div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method post">POST</span>
+      <span class="endpoint-path">/api/v1/check-payment</span>
+      <span class="endpoint-desc">Check transaction (POST)</span>
+    </div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method get">GET</span>
+      <span class="endpoint-path">/api/v1/info</span>
+      <span class="endpoint-desc">Shop info + total paid</span>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <h2>ចាប់ផ្តើមឥឡូវ</h2>
+  <p>Register ម្តង → បាន API Key → integrate ក្នុង 5 នាទី</p>
+  <a href="/register" class="btn btn-primary" style="font-size:1rem;padding:12px 32px">Get Free API Key →</a>
+</section>
+
+<footer>© 2025 Kairozen KHQR API · Built for Cambodia 🇰🇭</footer>
+</body>
+</html>

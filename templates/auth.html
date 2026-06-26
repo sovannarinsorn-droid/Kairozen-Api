@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>{% if mode=='register' %}Register{% else %}Login{% endif %} · Kairozen KHQR</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--bg:#0a0d14;--surface:#111520;--border:#1e2535;--accent:#4f9eff;--accent2:#7c5cfc;--text:#e8eaf0;--muted:#6b7280;--red:#ef4444;--green:#22c55e}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column}
+  nav{display:flex;justify-content:space-between;align-items:center;padding:20px 48px;border-bottom:1px solid var(--border)}
+  .logo{font-size:1.1rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+
+  .auth-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px}
+  .auth-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px;width:100%;max-width:420px}
+  .auth-box h1{font-size:1.5rem;font-weight:700;margin-bottom:6px}
+  .auth-box p{color:var(--muted);font-size:.88rem;margin-bottom:32px}
+
+  label{display:block;font-size:.82rem;color:var(--muted);margin-bottom:6px;font-weight:500}
+  input{width:100%;background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:.92rem;font-family:'Inter',sans-serif;outline:none;transition:.2s;margin-bottom:18px}
+  input:focus{border-color:var(--accent)}
+  input::placeholder{color:#374151}
+
+  .btn{width:100%;padding:11px;border-radius:8px;border:none;font-size:.95rem;font-weight:600;cursor:pointer;transition:.2s;font-family:'Inter',sans-serif}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-primary:hover{background:#3b8ae0}
+  .btn-primary:disabled{opacity:.5;cursor:not-allowed}
+
+  .switch{text-align:center;margin-top:20px;font-size:.85rem;color:var(--muted)}
+  .switch a{color:var(--accent);text-decoration:none}
+
+  .alert{padding:10px 14px;border-radius:8px;font-size:.85rem;margin-bottom:16px;display:none}
+  .alert.error{background:#1a0a0a;border:1px solid #7f1d1d;color:#fca5a5}
+  .alert.success{background:#0a1a0f;border:1px solid #14532d;color:#86efac}
+
+  .loader{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="logo">⚡ Kairozen KHQR</a>
+</nav>
+<div class="auth-wrap">
+  <div class="auth-box">
+    {% if mode == 'register' %}
+    <h1>ចុះឈ្មោះ</h1>
+    <p>បង្កើត account ដើម្បីទទួល API Key</p>
+    {% else %}
+    <h1>Login</h1>
+    <p>ចូលទៅ dashboard របស់អ្នក</p>
+    {% endif %}
+
+    <div class="alert" id="alert"></div>
+
+    <div>
+      <label>Email</label>
+      <input type="email" id="email" placeholder="you@example.com"/>
+
+      <label>Password</label>
+      <input type="password" id="password" placeholder="••••••••"/>
+
+      <button class="btn btn-primary" id="submitBtn" onclick="handleSubmit()">
+        {% if mode == 'register' %}ចុះឈ្មោះ{% else %}Login{% endif %}
+      </button>
+    </div>
+
+    <div class="switch">
+      {% if mode == 'register' %}
+      មាន账号ហើយ? <a href="/login">Login</a>
+      {% else %}
+      មិនទាន់មី account? <a href="/register">ចុះឈ្មោះ</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+const MODE = "{{ mode }}";
+const endpoint = MODE === "register" ? "/register" : "/login";
+
+async function handleSubmit() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const btn = document.getElementById("submitBtn");
+  const alert = document.getElementById("alert");
+
+  if (!email || !password) {
+    showAlert("សូមបំពេញ Email និង Password", "error");
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loader"></span>កំពុងដំណើរការ...';
+
+  try {
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({email, password})
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      showAlert("✅ Success! កំពុង redirect...", "success");
+      setTimeout(() => window.location.href = data.redirect, 800);
+    } else {
+      showAlert(data.error || "មានបញ្ហា", "error");
+      btn.disabled = false;
+      btn.innerHTML = MODE === "register" ? "ចុះឈ្មោះ" : "Login";
+    }
+  } catch (e) {
+    showAlert("Connection error", "error");
+    btn.disabled = false;
+    btn.innerHTML = MODE === "register" ? "ចុះឈ្មោះ" : "Login";
+  }
+}
+
+function showAlert(msg, type) {
+  const el = document.getElementById("alert");
+  el.textContent = msg;
+  el.className = `alert ${type}`;
+  el.style.display = "block";
+}
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter") handleSubmit();
+});
+</script>
+</body>
+</html>
